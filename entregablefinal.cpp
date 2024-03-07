@@ -15,7 +15,6 @@ struct S_Tiempo {
 	int nMes;
 	int nAnio;
 };
-
 class Persona {
 protected:
 	string nIDPersona;
@@ -34,21 +33,23 @@ public:
 	
 	void mostrarDatos() const
 	{
+		cout <<""<< endl;
 		cout << "ID:  " << nIDPersona << endl;
 		cout << "Nombre: " << nombre << endl;
 		cout << "Apellido: " << apellido << endl;
 		cout << "Correo: " << correo << endl;
-		cout << endl;
+		
 	}
 	
-	void mostrarDatos2(string t) const
+	virtual void mostrarDatos(string t) const
 	{
-		cout <<setw(5)<< nIDPersona << setw(10) << nombre << setw(20)<< apellido << setw(30) << correo << setw(20);
+		cout <<setw(5)<< nIDPersona << setw(8) << nombre << setw(10)<< apellido <<setw(30) << correo << setw(20)<<"\t\t";
 		cout << endl;
 	}
 	
 	virtual bool buscar(const string &letras, int &contador) const = 0;
 };
+
 
 class Usuario : public Persona {
 private:
@@ -63,7 +64,7 @@ public:
 	string get_direccion() { return direccion; }
 	void set_direccion(string d) { direccion = d; }
 	
-	void mostrarDatos() const
+	void mostrarDato() const
 	{
 		cout << "--usuarios--" << endl;
 		Persona::mostrarDatos();
@@ -73,10 +74,8 @@ public:
 	
 	void mostrarDatos(string titulo) const
 	{
-		cout << "" << endl;
-		cout << "---------" << titulo << "-------------" << endl;
-		Persona::mostrarDatos2(titulo);
-		cout <<direccion << endl;
+		Persona::mostrarDatos(titulo);
+		cout  << setw(70)<<direccion << endl;
 		cout << endl;
 	}
 	
@@ -109,6 +108,66 @@ public:
 		return encontrado;
 	}
 };
+class GestionUsuarios {
+private:
+	Persona *usuarios[MAX_USUARIOS];
+	int numUsuarios;
+	
+public:
+	GestionUsuarios() : numUsuarios(0) {}
+	
+	void llenarUsuarios(int nCad, string arrNombres[], string arrApellidos[], string arrDirecciones[])
+	{
+		srand(time(NULL));
+		for (int i = 0; i < nCad; i++)
+		{
+			int id = 201 + i;
+			string nombre = arrNombres[rand() % 10];
+			string apellido = arrApellidos[rand() % 10];
+			string direccion = arrDirecciones[rand() % 10];
+			usuarios[i] = new Usuario(id, nombre, apellido, direccion);
+		}
+		numUsuarios = nCad;
+	}
+	
+	void imprimirUsuarios(bool imprimirEnTabla) const
+	{
+		if (imprimirEnTabla)
+		{
+			cout << "---------" << "Usuarios" << "-------------" << endl;
+			cout << setw(5) << "ID" << setw(8) << "Nombre" << setw(10) << "Apellido" << setw(20) << "Correo" << setw(25)<<"Direccion"<<endl;
+			for (int i = 0; i < numUsuarios; i++)
+			{
+				usuarios[i]->mostrarDatos("usuario");
+			}
+		}
+		else{
+			cout << "\nLISTADO DE USUARIOS:" << endl;
+			for (int i = 0; i < numUsuarios; i++)
+			{
+				// Llamar al método mostrarDato de Usuario en lugar de Persona
+				Usuario *user = dynamic_cast<Usuario *>(usuarios[i]); // Convertir a Usuario
+				if (user != nullptr)
+				{
+					user->mostrarDato();
+				}
+			}
+		}
+	}
+	
+	void buscarUsuarios(const string &letras_a_buscar) const
+	{
+		int contador = 0;
+		cout << "\nBUSCAR USUARIO:" << endl;
+		for (int i = 0; i < numUsuarios; i++)
+		{
+			usuarios[i]->buscar(letras_a_buscar, contador);
+		}
+		cout << "Número total de coincidencias: " << contador << endl;
+	}
+	
+};
+
 
 class Bibliotecario : public Persona {
 private:
@@ -119,6 +178,20 @@ public:
 	
 	Bibliotecario(int id, const string &nombre, const string &apellido, const string &fechaNacimiento)
 		: Persona(id, nombre, apellido), fechaNacimiento(fechaNacimiento) {}
+	
+	void mostrarDatos() const
+	{
+		cout << "--BIBLIOTECARIO--" << endl;
+		Persona::mostrarDatos();
+		cout << "Fecha de Nacimiento: " << fechaNacimiento << endl;
+		cout << endl;
+	}
+	void mostrarDatos(string t) const
+	{
+		Persona::mostrarDatos(t);
+		cout << setw(70)<< fechaNacimiento << endl;
+		cout << endl;
+	}
 	
 	bool buscar(const string &letras, int &contador) const override
 	{
@@ -148,15 +221,68 @@ public:
 		
 		return encontrado;
 	}
-	
-	void mostrarDatos() const
-	{
-		cout << "--BIBLIOTECARIO--" << endl;
-		//Persona::mostrarDatos();
-		cout << "Fecha de Nacimiento: " << fechaNacimiento << endl;
-		cout << endl;
-	}
 };
+class GestionBibliotecarios {
+private:
+	Persona *bibliotecarios[MAX_BIBLIOTECARIOS];
+	int numBibliotecarios;
+	
+public:
+	GestionBibliotecarios() :numBibliotecarios(0) {}
+	
+	void llenarBibliotecarios(int nCad, string arrNombres[], string arrApellidos[], string arrFechas[])
+	{
+		srand(time(NULL));
+		for (int i = 0; i < nCad; i++)
+		{
+			int id = 301 + i;
+			string nombre = arrNombres[rand() % 10];
+			string apellido = arrApellidos[rand() % 10];
+			string fechaNacimiento = arrFechas[rand() % 10];
+			bibliotecarios[i] = new Bibliotecario(id, nombre, apellido, fechaNacimiento);
+		}
+		numBibliotecarios = nCad;
+	}
+	
+	void imprimirBibliotecarios(bool imprimirEnTabla) const
+	{
+		if (imprimirEnTabla)
+		{
+			cout << "--BIBLIOTECARIO--" << endl;
+			
+			cout << setw(5) << "ID" << setw(8) << "Nombre" << setw(10) << "Apellido" << setw(20)<< "Correo: " <<setw(30) << "Fecha Nacimiento" << endl;
+			for (int i = 0; i < numBibliotecarios; i++)
+			{
+				bibliotecarios[i]->mostrarDatos("BIBLIOTECARIO");
+			}
+		}
+		else{
+			cout << "\nLISTADO DE BIBLIOTECARIOS:" << endl;
+			for (int i = 0; i < numBibliotecarios; i++)
+			{
+				// Llamar al método mostrarDatos de Bibliotecario en lugar de Persona
+				Bibliotecario *biblio = dynamic_cast<Bibliotecario *>(bibliotecarios[i]); // Convertir a Bibliotecario
+				if (biblio != nullptr)
+				{
+					biblio->mostrarDatos();
+				}
+			}
+		}
+	}
+	
+	void buscarBibliotecarios(const string &letras_a_buscar) const
+	{
+		int contador = 0;
+		cout << "\nBUSCAR BIBLIOTECARIO:" << endl;
+		for (int i = 0; i < numBibliotecarios; i++)
+		{
+			bibliotecarios[i]->buscar(letras_a_buscar, contador);
+		}
+		cout << "Número total de coincidencias: " << contador << endl;
+	}
+	
+};
+
 
 class Libro {
 private:
@@ -184,6 +310,13 @@ public:
 		cout << "Editorial: " << sEditorial << endl;
 		cout << "Número de Estante: " << nNumEstante << endl;
 		cout << "Estado: " << arrEstado << endl;
+		cout << endl;
+	}
+	void mostrarDatos(string Titulo) const
+	{
+		cout<<setw(1)<<nSNBI<<setw(17)<<sTituloLibro<<setw(16)<<sAutorLibro<<setw(8)
+			<<tFechaPublicacion.nDia<<"/"<<tFechaPublicacion.nMes<<"/"<<tFechaPublicacion.nAnio <<
+			setw(12)<< sEditorial<<setw(6) << nNumEstante<<setw(9)<< arrEstado<<endl;
 		cout << endl;
 	}
 	
@@ -243,17 +376,20 @@ public:
 	{
 		if (imprimirEnTabla)
 		{
-			cout << setw(5) << "SNBI" << setw(20) << "Título" << setw(20) << "Autor" << setw(20) << "Fecha Publicación"
-				<< setw(15) << "Editorial" << setw(10) << "Estante" << setw(15) << "Estado" << endl;
+			cout << setw(1) << "SNBI" << setw(15) << "Título" << setw(13)<< "Autor" << setw(20) << "Publicado"
+				<< setw(12) << "Editorial" << setw(9) << "Estante" << setw(8) << "Estado" << endl;
+			for (int i = 0; i < numLibros; i++)
+			{
+				libros[i].mostrarDatos("LIBRO");
+			}
+		}
+		else
+		{
+			cout << "\nLISTADO DE LIBROS:" << endl;
 			for (int i = 0; i < numLibros; i++)
 			{
 				libros[i].mostrarDatos();
 			}
-		}
-		cout << "\nLISTADO DE LIBROS:" << endl;
-		for (int i = 0; i < numLibros; i++)
-		{
-			libros[i].mostrarDatos();
 		}
 	}
 	
@@ -269,109 +405,10 @@ public:
 	}
 };
 
-class GestionUsuarios {
-private:
-	Persona *usuarios[MAX_USUARIOS];
-	int numUsuarios;
-	
-public:
-	GestionUsuarios() : numUsuarios(0) {}
-	
-	void llenarUsuarios(int nCad, string arrNombres[], string arrApellidos[], string arrDirecciones[])
-	{
-		srand(time(NULL));
-		for (int i = 0; i < nCad; i++)
-		{
-			int id = 201 + i;
-			string nombre = arrNombres[rand() % 10];
-			string apellido = arrApellidos[rand() % 10];
-			string direccion = arrDirecciones[rand() % 10];
-			usuarios[i] = new Usuario(id, nombre, apellido, direccion);
-		}
-		numUsuarios = nCad;
-	}
-	
-	void imprimirUsuarios(bool imprimirEnTabla) const
-	{
-		if (imprimirEnTabla)
-		{
-			cout << setw(5) << "ID" << setw(10) << "Nombre" << setw(20) << "Apellido" << setw(30) << "Correo" << setw(15)<<"Direccion"<<endl;
-			for (int i = 0; i < numUsuarios; i++)
-			{
-				usuarios[i]->mostrarDatos2("usuario");
-			}
-		}
-		cout << "\nLISTADO DE USUARIOS:" << endl;
-		for (int i = 0; i < numUsuarios; i++)
-		{
-			usuarios[i]->mostrarDatos();
-		}
-	}
-	
-	void buscarUsuarios(const string &letras_a_buscar) const
-	{
-		int contador = 0;
-		cout << "\nBUSCAR USUARIO:" << endl;
-		for (int i = 0; i < numUsuarios; i++)
-		{
-			usuarios[i]->buscar(letras_a_buscar, contador);
-		}
-		cout << "Número total de coincidencias: " << contador << endl;
-	}
-	
-};
 
-class GestionBibliotecarios {
-private:
-	Persona *bibliotecarios[MAX_BIBLIOTECARIOS];
-	int numBibliotecarios;
-	
-public:
-	GestionBibliotecarios() :numBibliotecarios(0) {}
-	
-	void llenarBibliotecarios(int nCad, string arrNombres[], string arrApellidos[], string arrFechas[])
-	{
-		srand(time(NULL));
-		for (int i = 0; i < nCad; i++)
-		{
-			int id = 301 + i;
-			string nombre = arrNombres[rand() % 10];
-			string apellido = arrApellidos[rand() % 10];
-			string fechaNacimiento = arrFechas[rand() % 10];
-			bibliotecarios[i] = new Bibliotecario(id, nombre, apellido, fechaNacimiento);
-		}
-		numBibliotecarios = nCad;
-	}
-	
-	void imprimirBibliotecarios(bool imprimirEnTabla) const
-	{
-		if (imprimirEnTabla)
-		{
-			cout << setw(5) << "ID" << setw(20) << "Nombre" << setw(20) << "Apellido" << setw(25) << "Fecha Nacimiento" << endl;
-			for (int i = 0; i < numBibliotecarios; i++)
-			{
-				bibliotecarios[i]->mostrarDatos2("BIBLIOTECARIO");
-			}
-		}
-		cout << "\nLISTADO DE BIBLIOTECARIOS:" << endl;
-		for (int i = 0; i < numBibliotecarios; i++)
-		{
-			bibliotecarios[i]->mostrarDatos();
-		}
-	}
-	
-	void buscarBibliotecarios(const string &letras_a_buscar) const
-	{
-		int contador = 0;
-		cout << "\nBUSCAR BIBLIOTECARIO:" << endl;
-		for (int i = 0; i < numBibliotecarios; i++)
-		{
-			bibliotecarios[i]->buscar(letras_a_buscar, contador);
-		}
-		cout << "Número total de coincidencias: " << contador << endl;
-	}
 
-};
+
+
 
 int main()
 {
@@ -386,7 +423,7 @@ int main()
 	string arrDirecciones[] = {"Direccion 1", "Direccion 2", "Direccion 3", "Direccion 4", "Direccion 5", "Direccion 6", "Direccion 7", "Direccion 8", "Direccion 9", "Direccion 10"};
 	string arrFechas[] = {"10/01/1980", "15/03/1975", "20/05/1990", "05/11/1988", "30/09/1979", "12/07/1985", "22/04/1995", "18/08/1982", "08/12/1970", "25/06/1992"};
 	string arrTitulos[] = {"Aprenda C", "Calculo 1", "Problemas y Soluciones", "Tecnología Moderna", "Los Animales"};
-	string arrAutores[] = {"Erich Segal", "William P. Blatty", "Richard Bach", "Erica Jong", "Gabriel Garciía Márquez"};
+	string arrAutores[] = {"Erich Segal", "William P. Blatty", "Richard Bach", "Erica Jong", "Gabriel G.M."};
 	string arrEditorial[] = {"Comunity", "Santa Cruz", "La Hogera", "Editorial C", "AyR"};
 	string arrEstado[] = {"Bueno", "Aceptable", "Malo"};
 	do
@@ -427,7 +464,7 @@ int main()
 			cout << "--------------------" << endl;
 			cout << "¿Quiere imprimir en forma de tabla? ( 1: si, 0:No): ";
 			cin >> imprimirEnTabla;
-			cout << "--------------------" << endl;
+			cout << "--------------------------------" << endl;
 			if (subopcion_listar == 1)
 			{
 				gestionLibros.imprimirLibros(imprimirEnTabla);
