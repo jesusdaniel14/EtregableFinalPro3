@@ -16,6 +16,7 @@ struct S_Tiempo {
 	int nMes;
 	int nAnio;
 };
+
 class Persona {
 protected:
 	string nIDPersona;
@@ -111,10 +112,7 @@ public:
 			c = toupper(c);
 		}
 		
-		bool encontrado = (nombreUpper.find(letrasUpper) != string::npos) 
-			 || (apellidoUpper.find(letrasUpper) != string::npos)
-			 || (correoUpper.find(letrasUpper) != string::npos)
-			 || (direccionUpper.find(letrasUpper) != string::npos);
+		bool encontrado = buscarRecursivo(letrasUpper, nombreUpper, apellidoUpper, correoUpper, direccionUpper);
 		if (encontrado)
 		{
 			contador++;
@@ -123,7 +121,23 @@ public:
 		
 		return encontrado;
 	}
+	
+private:
+		bool buscarRecursivo(const string &letras, const string &nombreUpper, const string &apellidoUpper, 
+							 const string &correoUpper, const string &direccionUpper) const
+		{
+			if (nombreUpper.find(letras) != string::npos || 
+				apellidoUpper.find(letras) != string::npos ||
+				correoUpper.find(letras) != string::npos ||
+				direccionUpper.find(letras) != string::npos)
+			{
+				return true;
+			}
+			
+			return false;
+		}
 };
+
 class GestionUsuarios {
 private:
 	Persona *usuarios[MAX_USUARIOS];
@@ -233,7 +247,7 @@ public:
 			c = toupper(c);
 		}
 		
-		bool encontrado = (nombreUpper.find(letrasUpper) != string::npos) || (apellidoUpper.find(letrasUpper) != string::npos)|| (correoUpper.find(letrasUpper) != string::npos);
+		bool encontrado = buscarRecursivo(letrasUpper, nombreUpper, apellidoUpper, correoUpper, "");
 		if (encontrado)
 		{
 			contador++;
@@ -242,7 +256,22 @@ public:
 		
 		return encontrado;
 	}
+	
+private:
+		bool buscarRecursivo(const string &letras, const string &nombreUpper, const string &apellidoUpper,
+							 const string &correoUpper, const string &direccionUpper) const
+		{
+			if (nombreUpper.find(letras) != string::npos || 
+				apellidoUpper.find(letras) != string::npos ||
+				correoUpper.find(letras) != string::npos)
+			{
+				return true;
+			}
+			
+			return false;
+		}
 };
+
 class GestionBibliotecarios {
 private:
 	Persona *bibliotecarios[MAX_BIBLIOTECARIOS];
@@ -363,8 +392,7 @@ public:
 			c = toupper(c);
 		}
 		
-		bool encontrado = (tituloUpper.find(letrasUpper) != string::npos) 
-			 || (autorUpper.find(letrasUpper) != string::npos);
+		bool encontrado = buscarRecursivo(letrasUpper, tituloUpper, autorUpper, "");
 		if (encontrado)
 		{
 			contador++;
@@ -372,6 +400,18 @@ public:
 		}
 		
 		return encontrado;}
+	
+private:
+		bool buscarRecursivo(const string &letras, const string &tituloUpper, const string &autorUpper, const string &editorial) const
+		{
+			if (tituloUpper.find(letras) != string::npos || 
+				autorUpper.find(letras) != string::npos)
+			{
+				return true;
+			}
+			
+			return false;
+		}
 };
 
 class GestionLibros {
@@ -496,10 +536,7 @@ int main()
 			cout << "4. Regresar al menu principal " << endl;
 			cout << "Seleccione una opción: ";
 			cin >> subopcion_listar;
-			cout << "--------------------" << endl;
-//			cout << "¿Quiere imprimir en forma de tabla? ( 1: Si, 0:No): ";
-	//		cin >> imprimirEnTabla;
-			// Validar entrada del submenu de listado
+			// Validar entrada del usuario
 			while (cin.fail() || subopcion_listar < 1 || subopcion_listar > 4)
 			{
 				cin.clear();
@@ -507,98 +544,83 @@ int main()
 				cout << "Respuesta inválida, intente otra vez." << endl;
 				cout << "Seleccione una opción: ";
 				cin >> subopcion_listar;
-				cout << "--------------------" << endl;
-			}			
-			cout << "¿Quiere imprimir en forma de tabla? ( 1: Si, 0:No): ";
-			cin >> imprimirEnTabla;
-			while (cin.fail() || imprimirEnTabla <0 || imprimirEnTabla > 1)
-			{
-				cin.clear();
-				cin.ignore(numeric_limits<streamsize>::max(), '\n');
-				cout << "Respuesta inválida, intente otra vez." << endl;
-				cout << "Seleccione una opción: ";
-				cin >> imprimirEnTabla;
-				cout << "--------------------" << endl;
-			}			
+			}
+			
 			if (subopcion_listar == 1)
-			{				
+			{
+				cout << "¿Desea imprimir en forma de tabla (1) o detalle (0)?" << endl;
+				cin >> imprimirEnTabla;
 				gestionLibros.imprimirLibros(imprimirEnTabla);
 			}
 			else if (subopcion_listar == 2)
 			{
+				cout << "¿Desea imprimir en forma de tabla (1) o detalle (0)?" << endl;
+				cin >> imprimirEnTabla;
 				gestionUsuarios.imprimirUsuarios(imprimirEnTabla);
 			}
 			else if (subopcion_listar == 3)
 			{
+				cout << "¿Desea imprimir en forma de tabla (1) o detalle (0)?" << endl;
+				cin >> imprimirEnTabla;
 				gestionBibliotecarios.imprimirBibliotecarios(imprimirEnTabla);
 			}
 			else if (subopcion_listar == 4)
 			{
-				break; // Salir del caso 2 y volver al menú principal
-			}
-			else
-			{
-				cout << "Opción no válida. Intente de nuevo." << endl;
+				cout << "Regresando al menú principal..." << endl;
 			}
 			break;
 		case 3:
 			int subopcion_buscar;
 			cout << "BUSCAR:" << endl;
 			cout << "1. Buscar libros" << endl;
-			cout << "2. Buscar Usuario" << endl;
+			cout << "2. Buscar usuarios" << endl;
 			cout << "3. Buscar bibliotecarios" << endl;
-			cout << "0. Regresar al menu principal " << endl;
+			cout << "4. Regresar al menu principal " << endl;
 			cout << "Seleccione una opción: ";
 			cin >> subopcion_buscar;
-			cout << "--------------------" << endl;
-			// Validar entrada del submenu de listado
-			while (cin.fail() || subopcion_listar < 0 || subopcion_listar > 3)
+			// Validar entrada del usuario
+			while (cin.fail() || subopcion_buscar < 1 || subopcion_buscar > 4)
 			{
 				cin.clear();
 				cin.ignore(numeric_limits<streamsize>::max(), '\n');
 				cout << "Respuesta inválida, intente otra vez." << endl;
 				cout << "Seleccione una opción: ";
-				cin >> subopcion_listar;
-				cout << "--------------------" << endl;
+				cin >> subopcion_buscar;
 			}
 			if (subopcion_buscar == 1)
 			{
 				string letras_a_buscar;
-				cout << "Ingrese las letras para buscar en el titulo o autor de un libro: ";
-				cin.ignore(); // Ignorar el buffer del enter anterior
+				cout << "Ingrese las letras que desea buscar en libros: ";
+				cin.ignore();
 				getline(cin, letras_a_buscar);
 				gestionLibros.buscarLibros(letras_a_buscar);
 			}
 			else if (subopcion_buscar == 2)
 			{
 				string letras_a_buscar;
-				cout << "Ingrese las letras para buscar en el nombre o apellido del usuario: ";
-				cin.ignore(); // Ignorar el buffer del enter anterior
+				cout << "Ingrese las letras que desea buscar en usuarios: ";
+				cin.ignore();
 				getline(cin, letras_a_buscar);
 				gestionUsuarios.buscarUsuarios(letras_a_buscar);
 			}
 			else if (subopcion_buscar == 3)
 			{
 				string letras_a_buscar;
-				cout << "Ingrese las letras para buscar en el nombre o apellido del bibliotecario: ";
-				cin.ignore(); // Ignorar el buffer del enter anterior
+				cout << "Ingrese las letras que desea buscar en bibliotecarios: ";
+				cin.ignore();
 				getline(cin, letras_a_buscar);
 				gestionBibliotecarios.buscarBibliotecarios(letras_a_buscar);
 			}
-			else if (subopcion_buscar == 0)
+			else if (subopcion_buscar == 4)
 			{
-				break; // Salir del caso 3 y volver al menú principal
-			}
-			else
-			{
-				cout << "Opción no válida. Intente de nuevo." << endl;
+				cout << "Regresando al menú principal..." << endl;
 			}
 			break;
 		case 4:
-			return 0;
-		default:
-			cout << "Opción no válida. Intente de nuevo." << endl;
+			cout << "Saliendo del programa..." << endl;
 			break;
+		default:
+			cout << "Opción no válida, intente de nuevo." << endl;
 		}
 	} while (opcion != 4);
 	
