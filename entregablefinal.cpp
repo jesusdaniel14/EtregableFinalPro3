@@ -3,6 +3,7 @@
 #include <string>
 #include <cctype>
 #include <iomanip>
+#include <limits>
 
 using namespace std;
 
@@ -28,7 +29,7 @@ public:
 	Persona(int id, const string &nombre, const string &apellido)
 		: nIDPersona(to_string(id)), nombre(nombre), apellido(apellido)
 	{
-		correo = nombre + "." + apellido + "@gmail.com";
+		correo = nombre + apellido + "@gmail.com";
 	}
 	
 	void mostrarDatos() const
@@ -89,6 +90,9 @@ public:
 		
 		string nombreUpper = nombre;
 		string apellidoUpper = apellido;
+		string correoUpper = correo;
+		string direccionUpper = direccion;
+		
 		for (char &c : nombreUpper)
 		{
 			c = toupper(c);
@@ -98,7 +102,19 @@ public:
 			c = toupper(c);
 		}
 		
-		bool encontrado = (nombreUpper.find(letrasUpper) != string::npos) || (apellidoUpper.find(letrasUpper) != string::npos);
+		for (char &c : correoUpper)
+		{
+			c = toupper(c);
+		}
+		for (char &c : direccionUpper)
+		{
+			c = toupper(c);
+		}
+		
+		bool encontrado = (nombreUpper.find(letrasUpper) != string::npos) 
+			 || (apellidoUpper.find(letrasUpper) != string::npos)
+			 || (correoUpper.find(letrasUpper) != string::npos)
+			 || (direccionUpper.find(letrasUpper) != string::npos);
 		if (encontrado)
 		{
 			contador++;
@@ -122,8 +138,8 @@ public:
 		for (int i = 0; i < nCad; i++)
 		{
 			int id = 201 + i;
-			string nombre = arrNombres[rand() % 10];
-			string apellido = arrApellidos[rand() % 10];
+			string nombre = arrNombres[i+rand() % 1];
+			string apellido = arrApellidos[i+rand() % 10];
 			string direccion = arrDirecciones[rand() % 10];
 			usuarios[i] = new Usuario(id, nombre, apellido, direccion);
 		}
@@ -203,6 +219,7 @@ public:
 		
 		string nombreUpper = nombre;
 		string apellidoUpper = apellido;
+		string correoUpper = correo;
 		for (char &c : nombreUpper)
 		{
 			c = toupper(c);
@@ -211,12 +228,16 @@ public:
 		{
 			c = toupper(c);
 		}
+		for (char &c : correoUpper)
+		{
+			c = toupper(c);
+		}
 		
-		bool encontrado = (nombreUpper.find(letrasUpper) != string::npos) || (apellidoUpper.find(letrasUpper) != string::npos);
+		bool encontrado = (nombreUpper.find(letrasUpper) != string::npos) || (apellidoUpper.find(letrasUpper) != string::npos)|| (correoUpper.find(letrasUpper) != string::npos);
 		if (encontrado)
 		{
 			contador++;
-			mostrarDatos();
+			mostrarDatos("");
 		}
 		
 		return encontrado;
@@ -235,7 +256,7 @@ public:
 		srand(time(NULL));
 		for (int i = 0; i < nCad; i++)
 		{
-			int id = 301 + i;
+			int id = 1110 + i;
 			string nombre = arrNombres[rand() % 10];
 			string apellido = arrApellidos[rand() % 10];
 			string fechaNacimiento = arrFechas[rand() % 10];
@@ -321,7 +342,7 @@ public:
 	}
 	
 	
-	bool buscar(const string &letras) const
+	bool buscarLibros(const string &letras, int &contador) const 
 	{
 		string letrasUpper = letras;
 		for (char &c : letrasUpper)
@@ -331,6 +352,8 @@ public:
 		
 		string tituloUpper = sTituloLibro;
 		string autorUpper = sAutorLibro;
+		
+		
 		for (char &c : tituloUpper)
 		{
 			c = toupper(c);
@@ -340,8 +363,15 @@ public:
 			c = toupper(c);
 		}
 		
-		return tituloUpper.find(letrasUpper) != string::npos || autorUpper.find(letrasUpper) != string::npos;
-	}
+		bool encontrado = (tituloUpper.find(letrasUpper) != string::npos) 
+			 || (autorUpper.find(letrasUpper) != string::npos);
+		if (encontrado)
+		{
+			contador++;
+			mostrarDatos("COINCIDENCIA");
+		}
+		
+		return encontrado;}
 };
 
 class GestionLibros {
@@ -399,16 +429,11 @@ public:
 		cout << "\nBUSCAR LIBROS:" << endl;
 		for (int i = 0; i < numLibros; i++)
 		{
-			libros[i].buscar(letras_a_buscar);
+			libros[i].buscarLibros(letras_a_buscar, contador);
 		}
 		cout << "Número total de coincidencias: " << contador << endl;
 	}
 };
-
-
-
-
-
 
 int main()
 {
@@ -438,6 +463,16 @@ int main()
 		cout << "Seleccione una opción: ";
 		cin >> opcion;
 		cout << "--------------------" << endl;
+		// Validar entrada del usuario
+		while (cin.fail() || opcion < 1 || opcion > 4)
+		{
+			cin.clear();
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			cout << "Respuesta inválida, intente otra vez." << endl;
+			cout << "Seleccione una opción: ";
+			cin >> opcion;
+			cout << "--------------------" << endl;
+		}
 		switch (opcion)
 		{
 		case 1:
@@ -458,15 +493,35 @@ int main()
 			cout << "1. Listar libros" << endl;
 			cout << "2. Listar usuarios" << endl;
 			cout << "3. Listar bibliotecarios" << endl;
-			cout << "0. Regresar al menu principal " << endl;
+			cout << "4. Regresar al menu principal " << endl;
 			cout << "Seleccione una opción: ";
 			cin >> subopcion_listar;
 			cout << "--------------------" << endl;
-			cout << "¿Quiere imprimir en forma de tabla? ( 1: si, 0:No): ";
-			cin >> imprimirEnTabla;
-			cout << "--------------------------------" << endl;
-			if (subopcion_listar == 1)
+//			cout << "¿Quiere imprimir en forma de tabla? ( 1: Si, 0:No): ";
+	//		cin >> imprimirEnTabla;
+			// Validar entrada del submenu de listado
+			while (cin.fail() || subopcion_listar < 1 || subopcion_listar > 4)
 			{
+				cin.clear();
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+				cout << "Respuesta inválida, intente otra vez." << endl;
+				cout << "Seleccione una opción: ";
+				cin >> subopcion_listar;
+				cout << "--------------------" << endl;
+			}			
+			cout << "¿Quiere imprimir en forma de tabla? ( 1: Si, 0:No): ";
+			cin >> imprimirEnTabla;
+			while (cin.fail() || imprimirEnTabla <0 || imprimirEnTabla > 1)
+			{
+				cin.clear();
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+				cout << "Respuesta inválida, intente otra vez." << endl;
+				cout << "Seleccione una opción: ";
+				cin >> imprimirEnTabla;
+				cout << "--------------------" << endl;
+			}			
+			if (subopcion_listar == 1)
+			{				
 				gestionLibros.imprimirLibros(imprimirEnTabla);
 			}
 			else if (subopcion_listar == 2)
@@ -477,7 +532,7 @@ int main()
 			{
 				gestionBibliotecarios.imprimirBibliotecarios(imprimirEnTabla);
 			}
-			else if (subopcion_listar == 0)
+			else if (subopcion_listar == 4)
 			{
 				break; // Salir del caso 2 y volver al menú principal
 			}
@@ -496,6 +551,16 @@ int main()
 			cout << "Seleccione una opción: ";
 			cin >> subopcion_buscar;
 			cout << "--------------------" << endl;
+			// Validar entrada del submenu de listado
+			while (cin.fail() || subopcion_listar < 0 || subopcion_listar > 3)
+			{
+				cin.clear();
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+				cout << "Respuesta inválida, intente otra vez." << endl;
+				cout << "Seleccione una opción: ";
+				cin >> subopcion_listar;
+				cout << "--------------------" << endl;
+			}
 			if (subopcion_buscar == 1)
 			{
 				string letras_a_buscar;
@@ -535,7 +600,7 @@ int main()
 			cout << "Opción no válida. Intente de nuevo." << endl;
 			break;
 		}
-	} while (opcion != 0);
+	} while (opcion != 4);
 	
 	return 0;
 }
